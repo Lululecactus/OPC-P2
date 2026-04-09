@@ -23,11 +23,21 @@ product_description = description_container.find_next("p").text
 category = soup.find("ul", class_="breadcrumb").find_all("li")[2].text.strip()
 rating_container = soup.find("p", class_="star-rating")
 review_rating = rating_container["class"][1]
-print(titre)
-print(upc)
-print(price_excl)
-print(price_incl)
-print(number_available)
-print(product_description)
-print(category)
-print(review_rating)
+
+
+# Écriture dans le CSV
+header_et_data = [
+    ["product_page_url", url],
+    ["universal_product_code (upc)", upc],
+    ["title", titre],
+    ["price_including_tax", price_incl],
+    ["price_excluding_tax", price_excl],
+    ["number_available", number_available],
+    ["product_description", product_description],
+    ["category", category],
+    ["review_rating", review_rating]
+]
+
+with open("datas_livre.csv", "w", newline="", encoding="utf-8-sig") as f:
+    writer = csv.writer(f)
+    writer.writerows(header_et_data)
