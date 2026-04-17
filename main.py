@@ -1,30 +1,40 @@
-# libs
 import csv
-from scraper import extraire_donnees, extraire_liens_categorie
+import os
+from scraper import extraire_donnees, extraire_liens_categorie, extraire_toutes_les_categories
 
-# 1. URL de la catégorie choisie (ex: Travel)
-url_categorie = "https://books.toscrape.com/catalogue/category/books/travel_2/index.html"
+url_accueil = "https://books.toscrape.com/index.html"
 
-# 2. On récupère la liste de tous les liens de cette catégorie
-print("Récupération des liens de la catégorie en cours...")
-tous_les_liens = extraire_liens_categorie(url_categorie)
-print(f"Nombre de livres trouvés : {len(tous_les_liens)}")
+#récupère toutes les catégories
+print("Récupération de la liste des catégories...")
+liste_categories = extraire_toutes_les_categories(url_accueil)
+total_categories = len(liste_categories)
 
-nom_fichier = "donnees_categorie_travel.csv"
-
-# 3. Écriture CSV (Ta structure classique avec la boucle)
-with open(nom_fichier, "w", newline="", encoding="utf-8-sig") as f:
-    # On extrait le 1er livre pour générer les en-têtes automatiquement
-    infos_premier_livre = extraire_donnees(tous_les_liens[0])
-    en_tetes = infos_premier_livre.keys()
+for i, cat in enumerate(liste_categories, 1):
+    nom_cat = cat["nom"]
+    url_cat = cat["url"]
+    nom_propre = nom_cat.replace("\n", "").replace(" ", "")
     
-    writer = csv.DictWriter(f, fieldnames=en_tetes)
-    writer.writeheader() # On écrit les titres une seule fois
+    print(f"\n[{i}/{total_categories}] Categorie : {nom_propre}")
     
-    # On boucle sur chaque lien pour extraire et écrire les données
-    for lien in tous_les_liens:
-        print(f"Extraction de : {lien}")
-        infos_livre = extraire_donnees(lien)
-        writer.writerow(infos_livre)
+    # Création des dossiers catego
+    chemin_dossier = os.path.join("datas", nom_propre)
+    os.makedirs(chemin_dossier, exist_ok=True)
+    nom_csv = os.path.join(chemin_dossier, f"{nom_propre}.csv")
+    
+    liens_livres = extraire_liens_categorie(url_cat)
+    total_livres = len(liens_livres)
+    
+    # Écriture du CSV 
+    with open(nom_csv, "w", newline="", encoding="utf-8-sig") as f:
+        premier_livre = extraire_donnees(liens_livres[0])
+        writer = csv.DictWriter(f, fieldnames=premier_livre.keys())
+        writer.writeheader()
+        
+        for j, lien in enumerate(liens_livres, 1):
+            print(f"   -> Livre {j}/{total_livres}", end="\r")
+            infos = extraire_donnees(lien)
+            writer.writerow(infos)
+        
+        print("")
 
-print(f"Fichier {nom_fichier} créé avec succès !")
+print("\nExtraction terminée avec succès !")
