@@ -35,3 +35,31 @@ def extraire_donnees(url):
     }
     
     return donnees
+
+
+# récupérer les liens de la catégorie
+def extraire_liens_categorie(url_categorie):
+    liens_livres = []
+    url_actuelle = url_categorie
+
+    while url_actuelle != "":
+        reponse = requests.get(url_actuelle)
+        soup = BeautifulSoup(reponse.text, "html.parser")
+
+        # on recupere les liens de tous les livres par oage
+        tous_les_h3 = soup.find_all("h3")
+        for h3 in tous_les_h3:
+            lien_relatif = h3.find("a")["href"]
+            lien_complet = lien_relatif.replace("../../../", "https://books.toscrape.com/catalogue/")
+            liens_livres.append(lien_complet)
+
+        #cas il y a une page suivante
+        bouton_suivant = soup.find("li", class_="next")
+        if bouton_suivant:
+            page_suivante = bouton_suivant.find("a")["href"]
+            base_url = url_categorie.replace("index.html", "")
+            url_actuelle = base_url + page_suivante
+        else:
+            url_actuelle = ""
+            
+    return liens_livres
