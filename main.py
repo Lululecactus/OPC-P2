@@ -1,6 +1,7 @@
 import csv
 import os
 from scraper import extraire_donnees, extraire_liens_categorie, extraire_toutes_les_categories
+from utils import telecharger_image
 
 url_accueil = "https://books.toscrape.com/index.html"
 
@@ -18,13 +19,15 @@ for i, cat in enumerate(liste_categories, 1):
     
     # Création des dossiers catego
     chemin_dossier = os.path.join("datas", nom_propre)
-    os.makedirs(chemin_dossier, exist_ok=True)
+    chemin_images = os.path.join(chemin_dossier, "images")
+    os.makedirs(chemin_images, exist_ok=True)
+    
     nom_csv = os.path.join(chemin_dossier, f"{nom_propre}.csv")
     
     liens_livres = extraire_liens_categorie(url_cat)
     total_livres = len(liens_livres)
     
-    # Écriture du CSV 
+    # Écrirure du CSV 
     with open(nom_csv, "w", newline="", encoding="utf-8-sig") as f:
         premier_livre = extraire_donnees(liens_livres[0])
         writer = csv.DictWriter(f, fieldnames=premier_livre.keys())
@@ -34,6 +37,11 @@ for i, cat in enumerate(liste_categories, 1):
             print(f"   -> Livre {j}/{total_livres}", end="\r")
             infos = extraire_donnees(lien)
             writer.writerow(infos)
+            
+            # Téléchargement de l'image dans le sous-dossier
+            nom_image = f"{infos['universal_product_code']}.jpg"
+            chemin_final_image = os.path.join(chemin_images, nom_image)
+            telecharger_image(infos["image_url"], chemin_final_image)
         
         print("")
 
