@@ -1,5 +1,6 @@
 import csv
 import os
+import sys 
 from scraper import extraire_donnees, extraire_liens_categorie, extraire_toutes_les_categories
 from utils import telecharger_image
 
@@ -9,6 +10,20 @@ def main():
     # récupère toutes les catégories
     print("Récupération de la liste des catégories...")
     liste_categories = extraire_toutes_les_categories(url_accueil)
+
+    # scrapping de une seule categorie 
+    if len(sys.argv) > 1:
+        nom_recherche = sys.argv[1].lower()
+        liste_filtree = []
+        for categorie in liste_categories:
+            if nom_recherche in categorie["nom"].lower():
+                liste_filtree.append(categorie)
+        liste_categories = liste_filtree
+        
+        if not liste_categories:
+            print(f"Aucune catégorie trouvée pour : {nom_recherche}")
+            
+
     total_categories = len(liste_categories)
 
     for i, cat in enumerate(liste_categories, 1):
