@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from utils import clean_price, clean_available
+from utils import clean_price, clean_available, convert_rating
 
 # Extraire les données d'un livre
 def extraire_donnees(url):
@@ -21,7 +21,8 @@ def extraire_donnees(url):
     
     category = soup.find("ul", class_="breadcrumb").find_all("li")[2].text
     rating_container = soup.find("p", class_="star-rating")
-    review_rating = rating_container["class"][1]
+    review_rating_texte = rating_container["class"][1]
+    review_rating = convert_rating(review_rating_texte)
     image_url = soup.find("img")["src"].replace("../../", "https://books.toscrape.com/")
     
     return {
